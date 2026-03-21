@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>56.0</apiVersion>
+    <environments>Default</environments>
+    <formulas>
+        <name>GraduationRating</name>
+        <dataType>Number</dataType>
+        <expression>IF( {!$Record.X6_year_Grad_Pell_Underrepresented__c} &gt;= 60, 3,
+IF( {!$Record.X6_year_Grad_Pell_Underrepresented__c}&gt;= 45, 2,
+IF( {!$Record.X6_year_Grad_Pell_Underrepresented__c}&gt; 0, 1,
+IF( {!$Record.X6_year_Grad_Pell_Underrepresented__c} = 0, 0,
+0 ))))</expression>
+        <scale>2</scale>
+    </formulas>
+    <interviewLabel>Account Grad Rate - New {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Account Grad Rate - New</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Update_Six_Year_Underrepresented_or_Pell_Graduation_Rate</name>
+        <label>Update Six Year Underrepresented or Pell Graduation Rate</label>
+        <locationX>176</locationX>
+        <locationY>335</locationY>
+        <inputAssignments>
+            <field>Graduation_Rate_Rating__c</field>
+            <value>
+                <elementReference>GraduationRating</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Update_Six_Year_Underrepresented_or_Pell_Graduation_Rate</targetReference>
+        </connector>
+        <filterLogic>or</filterLogic>
+        <filters>
+            <field>X6_year_Grad_Pell_Underrepresented__c</field>
+            <operator>GreaterThan</operator>
+            <value>
+                <numberValue>0.0</numberValue>
+            </value>
+        </filters>
+        <object>Account</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

@@ -1,0 +1,2 @@
+# Exclude LWC Jest test files from deployment (createElement causes LWC1702)
+**/__tests__/**

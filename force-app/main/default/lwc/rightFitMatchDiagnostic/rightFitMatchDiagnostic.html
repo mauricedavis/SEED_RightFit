@@ -1,0 +1,175 @@
+<template>
+    <div class="simulator slds-p-around_small">
+        <h1 class="slds-text-heading_medium slds-m-bottom_x-small">Right Fit Match Simulator</h1>
+        <p class="slds-text-body_small slds-m-bottom_small slds-text-color_weak">
+            Adjust criteria below to see which colleges match. Results update in real time as you select.
+        </p>
+
+        <div class="simulator-layout">
+            <!-- Criteria Panel -->
+            <div class="criteria-panel slds-box slds-box_x-small slds-theme_shade slds-p-around_small">
+                <h2 class="slds-text-heading_small slds-m-bottom_x-small">Criteria</h2>
+
+                <div class="slds-form slds-form_stacked">
+                    <div class="ranges-row">
+                        <div class="range-item">
+                            <label class="range-label">GPA</label>
+                            <div class="range-inputs">
+                                <lightning-input type="number" min="0" max="4.5" step="0.1" placeholder="Low" value={gpaLow} onchange={handleGpaChange} data-field="low" class="range-input"></lightning-input>
+                                <lightning-input type="number" min="0" max="4.5" step="0.1" placeholder="High" value={gpaHigh} onchange={handleGpaChange} data-field="high" class="range-input"></lightning-input>
+                            </div>
+                        </div>
+                        <div class="range-item">
+                            <label class="range-label">ACT</label>
+                            <div class="range-inputs">
+                                <lightning-input type="number" min="1" max="36" step="1" placeholder="Low" value={actLow} onchange={handleActChange} data-field="low" class="range-input"></lightning-input>
+                                <lightning-input type="number" min="1" max="36" step="1" placeholder="High" value={actHigh} onchange={handleActChange} data-field="high" class="range-input"></lightning-input>
+                            </div>
+                        </div>
+                        <div class="range-item">
+                            <label class="range-label">SAT Math</label>
+                            <div class="range-inputs">
+                                <lightning-input type="number" min="200" max="800" step="10" placeholder="Low" value={satMathLow} onchange={handleSatMathChange} data-field="low" class="range-input"></lightning-input>
+                                <lightning-input type="number" min="200" max="800" step="10" placeholder="High" value={satMathHigh} onchange={handleSatMathChange} data-field="high" class="range-input"></lightning-input>
+                            </div>
+                        </div>
+                        <div class="range-item">
+                            <label class="range-label">SAT Verbal</label>
+                            <div class="range-inputs">
+                                <lightning-input type="number" min="200" max="800" step="10" placeholder="Low" value={satVerbalLow} onchange={handleSatVerbalChange} data-field="low" class="range-input"></lightning-input>
+                                <lightning-input type="number" min="200" max="800" step="10" placeholder="High" value={satVerbalHigh} onchange={handleSatVerbalChange} data-field="high" class="range-input"></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slds-form-element">
+                        <lightning-input type="checkbox" label="Test Scores Optional" checked={testScoresOptional} onchange={handleTestOptionalChange}></lightning-input>
+                    </div>
+
+                    <div class="criteria-section">
+                        <div class="section-header">
+                            <span class="criteria-section-title">Regions</span>
+                            <lightning-button label="Select All" variant="base" size="x-small" onclick={handleSelectAllRegions}></lightning-button>
+                        </div>
+                        <lightning-checkbox-group name="regions" label="Regions" variant="label-hidden" options={regionCheckboxOptions} value={selectedRegions} onchange={handleRegionCheckboxChange} class="region-checkbox-group"></lightning-checkbox-group>
+                    </div>
+
+                    <div class="criteria-section">
+                        <div class="section-header">
+                            <span class="criteria-section-title">College Size</span>
+                            <lightning-button label="Select All" variant="base" size="x-small" onclick={handleSelectAllSizes}></lightning-button>
+                        </div>
+                        <lightning-checkbox-group name="sizes" label="College Size" variant="label-hidden" options={sizeCheckboxOptions} value={selectedSizes} onchange={handleSizeCheckboxChange} class="size-checkbox-group"></lightning-checkbox-group>
+                    </div>
+
+                    <div class="criteria-section">
+                        <div class="section-header">
+                            <span class="criteria-section-title">College Setting</span>
+                        </div>
+                        <lightning-checkbox-group name="settings" label="College Setting" variant="label-hidden" options={settingCheckboxOptions} value={selectedSettings} onchange={handleSettingCheckboxChange} class="setting-checkbox-group"></lightning-checkbox-group>
+                        <lightning-input type="checkbox" label="Any/All (no preference)" class="criteria-checkbox" checked={settingAnyAll} onchange={handleSettingAnyAllChange}></lightning-input>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel slds-box slds-box_small">
+                <div class="slds-m-bottom_small slds-grid slds-grid_align-spread">
+                    <h2 class="slds-text-heading_small">Results</h2>
+                    <template lwc:if={hasSearched}>
+                        <span class="slds-badge {resultBadgeClass}">{matchCount} colleges</span>
+                    </template>
+                </div>
+
+                <template lwc:if={isLoading}>
+                    <lightning-spinner alternative-text="Searching..." size="medium" class="slds-m-vertical_large"></lightning-spinner>
+                </template>
+
+                <template lwc:elseif={error}>
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                        <span class="slds-assistive-text">Error</span>
+                        <h2>{error}</h2>
+                    </div>
+                </template>
+
+                <template lwc:elseif={hasSearched}>
+                    <div class="slds-m-bottom_small slds-p-bottom_small slds-border_bottom">
+                        <span class="slds-text-body_small slds-text-color_weak"><strong>Active filters:</strong> {activeFiltersSummary}</span>
+                    </div>
+                    <template lwc:if={showZeroMatchFeedback}>
+                        <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_small">
+                            <h4 class="slds-text-heading_small slds-m-bottom_x-small">Why no matches?</h4>
+                            <p class="slds-text-body_small slds-m-bottom_x-small"><strong>Criteria:</strong> {zeroMatchFeedback.criteriaSummary}</p>
+                            <p class="slds-text-body_small slds-m-bottom_x-small"><strong>Possible causes:</strong></p>
+                            <ul class="slds-list_dotted slds-m-left_medium slds-m-bottom_x-small">
+                                <template for:each={zeroMatchCauses} for:item="c">
+                                    <li key={c.id}>{c.text}</li>
+                                </template>
+                            </ul>
+                            <p class="slds-text-body_small slds-m-bottom_x-small"><strong>What to do:</strong></p>
+                            <ul class="slds-list_dotted slds-m-left_medium">
+                                <template for:each={zeroMatchSteps} for:item="s">
+                                    <li key={s.id}>{s.text}</li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <template lwc:if={showSuggestions}>
+                        <div class="slds-m-bottom_small">
+                            <span class="slds-text-heading_small">Suggestions</span>
+                            <ul class="slds-list_dotted slds-m-top_xx-small">
+                                <template for:each={suggestionList} for:item="item">
+                                    <li key={item.id}>{item.text}</li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <template lwc:if={matchCount}>
+                        <div class="results-table-wrapper">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">College</th>
+                                        <th scope="col">Right Fit</th>
+                                        <th scope="col">Region</th>
+                                        <th scope="col">Size</th>
+                                        <th scope="col">Setting</th>
+                                        <th scope="col">GPA</th>
+                                        <th scope="col">ACT</th>
+                                        <th scope="col">SAT<br>Math</th>
+                                        <th scope="col">SAT<br>Verbal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={resultsList} for:item="row">
+                                        <tr key={row.key}>
+                                            <td><a href={row.accountUrl} target="_blank" rel="noopener">{row.accountName}</a></td>
+                                            <td>{row.rightFitDisplay}</td>
+                                            <td>{row.geographicalRegion}</td>
+                                            <td>{row.collegeSizeFormula}</td>
+                                            <td>{row.collegeSetting}</td>
+                                            <td>{row.medianGpaDisplay}</td>
+                                            <td>{row.medianActDisplay}</td>
+                                            <td>{row.medianSatMathDisplay}</td>
+                                            <td>{row.medianSatVerbalDisplay}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+
+                    <template lwc:elseif={hasSearched}>
+                        <p class="slds-text-body_small slds-text-color_weak">No colleges match. Adjust criteria and try again.</p>
+                    </template>
+                </template>
+
+                <template lwc:else>
+                    <p class="slds-text-body_small slds-text-color_weak">Select at least one region, size, or setting to see matching colleges.</p>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,12 @@
+---
+description: Always cd to project folder before running scripts
+alwaysApply: true
+---
+
+# Scripts and Terminal Commands
+
+When running terminal commands or providing scripts for this project:
+
+- **Always include** `cd "c:\Users\MauriceJDavis\SEED_RightFit"` (or equivalent) as the first step
+- Use PowerShell syntax: `cd "path"; command` or `cd "path"` on its own line before the main command
+- Example: `cd "c:\Users\MauriceJDavis\SEED_RightFit"; npm run test`

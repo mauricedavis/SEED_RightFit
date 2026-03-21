@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>55.0</apiVersion>
+    <assignments>
+        <name>Add_to_collVar_of_Right_Fit_Match_Lists</name>
+        <label>Add to collVar of Right Fit Match Lists</label>
+        <locationX>264</locationX>
+        <locationY>971</locationY>
+        <assignmentItems>
+            <assignToReference>colVar_StudentRightFitList</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>recVar_StudentRightFitList</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_through_Colleges</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_rec_variables_for_Right_Fit_Match_List</name>
+        <label>Assign rec variables for Right Fit Match List</label>
+        <locationX>264</locationX>
+        <locationY>863</locationY>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.Student__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Contact_Record.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.College_Match__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_through_Colleges.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.Assignment_Source__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Automatic</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.Status__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>Draft</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.First_Match_Criteria__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.Common_App_Direct_Link__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_through_Colleges.Common_App_Link__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.Common_App_School__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_through_Colleges.Common_App_School__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>recVar_StudentRightFitList.Application_Link__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_through_Colleges.School_Application_Info__c</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Add_to_collVar_of_Right_Fit_Match_Lists</targetReference>
+        </connector>
+    </assignments>
+    <constants>
+        <name>SEEDMatchGreenConstant</name>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Green</stringValue>
+        </value>
+    </constants>
+    <constants>
+        <name>SEEDMatchingColorRed</name>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Red</stringValue>
+        </value>
+    </constants>
+    <constants>
+        <name>SEEDMatchingYellow</name>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Yellow</stringValue>
+        </value>
+    </constants>
+    <decisions>
+        <name>Does_Right_Fit_School_already_Exist</name>
+        <label>Does Right Fit School already Exist</label>
+        <locationX>396</locationX>
+        <locationY>755</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Right_Fit_Doesn_t_Exist</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>RightFitSchools.Id</leftValueReference>
+                <operator>EqualTo</operator>
+            </conditions>
+            <connector>
+                <targetReference>Assign_rec_variables_for_Right_Fit_Match_List</targetReference>
+            </connector>
+            <label>Right Fit Doesn&apos;t Exist</label>
+        </rules>
+    </decisions>
+    <description>This flow creates the right fit matches. Adds Test Scores Optional
+
+12.16.2025 (MJD) - Updated flow to trigger on Create AND Update (instead of just Create only).</description>
+    <environments>Default</environments>
+    <formulas>
+        <description>ACT Composite score high from student match record</description>
+        <name>ACTCompHigh</name>
+        <dataType>Number</dataType>
+        <expression>If( ISPICKVAL( {!$Record.ACT_Composite_Score__c}, &apos;1&apos;), 1,
+If( ISPICKVAL( {!$Record.ACT_Composite_Score__c} , &apos;7&apos;), 7,
+If( ISPICKVAL( {!$Record.ACT_Composite_Score__c} , &apos;13&apos;), 13,
+If( ISPICKVAL( {!$Record.ACT_Composite_Score__c} , &apos;19&apos;), 19,
+If( ISPICKVAL( {!$Record.ACT_Composite_Score__c} , &apos;25&apos;), 25,
+If( ISPICKVAL( {!$Record.ACT_Composite_Score__c} , &apos;31&apos;), 31,
+If( ISPICKVAL( {!$Record.ACT_Composite_Score__c}, &apos;36&apos;), 36,
+0)))))))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <description>Low ACT Composite score from student match record</description>
+        <name>ACTCompLow</name>
+        <dataType>Number</dataType>
+        <expression>If( ISPICKVAL( {!$Record.ACT_Score_Low__c}, &apos;1&apos;), 1,
+If( ISPICKVAL( {!$Record.ACT_Score_Low__c} , &apos;7&apos;), 7,
+If( ISPICKVAL( {!$Record.ACT_Score_Low__c} , &apos;13&apos;), 13,
+If( ISPICKVAL( {!$Record.ACT_Score_Low__c} , &apos;19&apos;), 19,
+If( ISPICKVAL( {!$Record.ACT_Score_Low__c} , &apos;25&apos;), 25,
+If( ISPICKVAL( {!$Record.ACT_Score_Low__c} , &apos;31&apos;), 31,
+If( ISPICKVAL( {!$Record.ACT_Score_Low__c}, &apos;36&apos;), 36,
+0)))))))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <description>College size from picklist on match record</description>
+        <name>CollegeSize</name>
+        <dataType>String</dataType>
+        <expression>If( ISPICKVAL( {!$Record.College_Size__c},&quot;Small (Less than 5,000 Students)&quot;), &quot;Small&quot;,
+If( ISPICKVAL( {!$Record.College_Size__c}, &quot;Medium (5,000 - 15,000 Students)&quot;), &quot;Medium&quot;,
+If( ISPICKVAL( {!$Record.College_Size__c}, &quot;Large (15,000+ Students)&quot;), &quot;Large&quot;,
+&quot;&quot;)))</expression>
+    </formulas>
+    <formulas>
+        <name>FarWestStudentDecision</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Far_West__c} = TRUE, &quot;Far West&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>GPAHighMatch</name>
+        <dataType>Number</dataType>
+        <expression>If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;1.0&quot;), 1.0,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;1.5&quot;), 1.5,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;2.0&quot;), 2.0,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;2.5&quot;), 2.5,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;3.0&quot;), 3.0,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;3.5&quot;), 3.5,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;4.0&quot;), 4.0,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;4.5&quot;), 4.5,
+If( ISPICKVAL( {!$Record.High_GPA_Accet__c}, &quot;5.0&quot;), 5.0,
+0
+)))))))))</expression>
+        <scale>1</scale>
+    </formulas>
+    <formulas>
+        <name>GPAMatchLow</name>
+        <dataType>Number</dataType>
+        <expression>If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;1.0&quot;), 1.0,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;1.5&quot;), 1.5,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;2.0&quot;), 2.0,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;2.5&quot;), 2.5,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;3.0&quot;), 3.0,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;3.5&quot;), 3.5,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;4.0&quot;), 4.0,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;4.5&quot;), 4.5,
+If( ISPICKVAL( {!$Record.Low_GPA_of_Accepted_Students__c}, &quot;5.0&quot;), 5.0,
+0
+)))))))))</expression>
+        <scale>1</scale>
+    </formulas>
+    <formulas>
+        <name>GreatLakes</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Great_Lakes__c} = TRUE, &quot;Great Lakes&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <description>Numerical version of the high SAT Math score from the student match criteria</description>
+        <name>MatchHighSATMath</name>
+        <dataType>Number</dataType>
+        <expression>If( ISPICKVAL({!$Record.SAT_Math_High__c}, &apos;200&apos;), 200,
+If( ISPICKVAL( {!$Record.SAT_Math_High__c} , &apos;300&apos;), 300,
+If( ISPICKVAL( {!$Record.SAT_Math_High__c}, &apos;400&apos;), 400,
+If( ISPICKVAL( {!$Record.SAT_Math_High__c} , &apos;500&apos;), 500,
+If( ISPICKVAL( {!$Record.SAT_Math_High__c}, &apos;600&apos;), 600,
+If( ISPICKVAL( {!$Record.SAT_Math_High__c}, &apos;700&apos;), 700,
+If( ISPICKVAL( {!$Record.SAT_Math_High__c}, &apos;800&apos;), 800,
+0)))))))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <description>Numerical version of the SAT High Verbal from the student match criteria record</description>
+        <name>MatchHighSATVerbal</name>
+        <dataType>Number</dataType>
+        <expression>If(  ISPICKVAL( {!$Record.SAT_Verbal_High_Score__c}, &apos;200&apos;), 200,
+If(  ISPICKVAL( {!$Record.SAT_Verbal_High_Score__c}, &apos;300&apos;), 300, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_High_Score__c}, &apos;400&apos;), 400, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_High_Score__c}, &apos;500&apos;), 500, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_High_Score__c}, &apos;600&apos;), 600, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_High_Score__c}, &apos;700&apos;), 700,
+If(  ISPICKVAL( {!$Record.SAT_Verbal_High_Score__c}, &apos;800&apos;), 800,
+0
+  )))))))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <description>Numerical version of the low SAT math</description>
+        <name>MatchLowSATMath</name>
+        <dataType>Number</dataType>
+        <expression>If(  ISPICKVAL( {!$Record.SAT_Math_Low__c}, &apos;200&apos;), 200,
+If(  ISPICKVAL( {!$Record.SAT_Math_Low__c}, &apos;300&apos;), 300, 
+If(  ISPICKVAL( {!$Record.SAT_Math_Low__c}, &apos;400&apos;), 400, 
+If(  ISPICKVAL( {!$Record.SAT_Math_Low__c}, &apos;500&apos;), 500, 
+If(  ISPICKVAL( {!$Record.SAT_Math_Low__c}, &apos;600&apos;), 600, 
+If(  ISPICKVAL( {!$Record.SAT_Math_Low__c}, &apos;700&apos;), 700,
+If(  ISPICKVAL( {!$Record.SAT_Math_Low__c}, &apos;800&apos;), 800,
+0
+  )))))))</expression>
+        <scale>2</scale>
+    </formulas>
+    <formulas>
+        <name>MatchLowSATVerbal</name>
+        <dataType>Number</dataType>
+        <expression>If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;200&apos;), 200,
+If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;300&apos;), 300, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;400&apos;), 400, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;500&apos;), 500, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;600&apos;), 600, 
+If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;700&apos;), 700,
+If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;800&apos;), 800,
+0
+  )))))))</expression>
+        <scale>0</scale>
+    </formulas>
+    <formulas>
+        <name>MidEast</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Mid_East__c} = TRUE, &quot;Mid East&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>NewEngland</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.New_England__c} = TRUE, &quot;New England&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>Plains</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Plains__c} = TRUE, &quot;Plains&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>RockyMountains</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Rocky_Mountains__c} = TRUE, &quot;Rocky Mountains&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>SizeLarge</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Large_15_000_Students__c} = TRUE, &quot;Large&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>SizeMedium</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Medium_5_000_to_15_000_Students__c} = TRUE, &quot;Medium&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>SizeSmall</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Small_Less_than_5_000_Students__c} = TRUE, &quot;Small&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>Southeast</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Southeast__c} = TRUE, &quot;Southeast&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <formulas>
+        <name>Southwest</name>
+        <dataType>String</dataType>
+        <expression>If({!$Record.Southwest__c} = TRUE, &quot;Southwest&quot;, &quot;&quot;)</expression>
+    </formulas>
+    <interviewLabel>Creating Right Fit Match Records {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Automation - Student Match Criteria - Creating Right Fit Match Records</label>
+    <loops>
+        <name>Loop_through_Colleges</name>
+        <label>Loop through Colleges</label>
+        <locationX>176</locationX>
+        <locationY>539</locationY>
+        <collectionReference>Get_Matching_Schools</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>RightFitSchools</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Create_collVar_Records</targetReference>
+        </noMoreValuesConnector>
+    </loops>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <name>Create_collVar_Records</name>
+        <label>Create collVar Records</label>
+        <locationX>176</locationX>
+        <locationY>1247</locationY>
+        <inputReference>colVar_StudentRightFitList</inputReference>
+    </recordCreates>
+    <recordLookups>
+        <description>Gets the contact record associated with this match criteria</description>
+        <name>Get_Contact_Record</name>
+        <label>Get Contact Record</label>
+        <locationX>176</locationX>
+        <locationY>323</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Get_Matching_Schools</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Student__r.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Contact</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_Matching_Schools</name>
+        <label>Get Matching Schools</label>
+        <locationX>176</locationX>
+        <locationY>431</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Loop_through_Colleges</targetReference>
+        </connector>
+        <filterLogic>(1 OR 2) AND 3 AND 4 AND ((5 AND 6 AND 7 AND 8) OR (9 AND 10) OR 23) AND (11 OR 12 OR 13 OR 14 OR 15 OR 16 OR 17 OR 18) AND (19 OR 20 OR 21) AND 22</filterLogic>
+        <filters>
+            <field>Right_Fit_Match_Color_Automatic__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SEEDMatchingYellow</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Right_Fit_Match_Color_Automatic__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SEEDMatchGreenConstant</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_GPA__c</field>
+            <operator>LessThanOrEqualTo</operator>
+            <value>
+                <elementReference>GPAHighMatch</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_GPA__c</field>
+            <operator>GreaterThanOrEqualTo</operator>
+            <value>
+                <elementReference>GPAMatchLow</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_SAT_Math__c</field>
+            <operator>LessThanOrEqualTo</operator>
+            <value>
+                <elementReference>MatchHighSATMath</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_SAT_Math__c</field>
+            <operator>GreaterThanOrEqualTo</operator>
+            <value>
+                <elementReference>MatchLowSATMath</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_SAT_Verbal__c</field>
+            <operator>LessThanOrEqualTo</operator>
+            <value>
+                <elementReference>MatchHighSATVerbal</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_SAT_Verbal__c</field>
+            <operator>GreaterThanOrEqualTo</operator>
+            <value>
+                <elementReference>MatchLowSATVerbal</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_ACT_Composite__c</field>
+            <operator>LessThanOrEqualTo</operator>
+            <value>
+                <elementReference>ACTCompHigh</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Median_ACT_Composite__c</field>
+            <operator>GreaterThanOrEqualTo</operator>
+            <value>
+                <elementReference>ACTCompLow</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>FarWestStudentDecision</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>RockyMountains</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Southeast</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>MidEast</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Southwest</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Plains</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>GreatLakes</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Geographical_Region__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>NewEngland</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>College_Size_Formula__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SizeMedium</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>College_Size_Formula__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SizeSmall</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>College_Size_Formula__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>SizeLarge</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>College_Setting__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.College_Setting__c</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Test_Scores_Optional__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>Account</object>
+        <sortField>Name</sortField>
+        <sortOrder>Asc</sortOrder>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>RightFitSchools</name>
+        <label>RightFitSchools</label>
+        <locationX>396</locationX>
+        <locationY>647</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Does_Right_Fit_School_already_Exist</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>College_Match__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Loop_through_Colleges.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Student__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Get_Contact_Record.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Student_Right_Fit_List__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Contact_Record</targetReference>
+        </connector>
+        <object>Student_Match_Criteria__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>colVar_StudentRightFitList</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Student_Right_Fit_List__c</objectType>
+    </variables>
+    <variables>
+        <name>recVar_StudentRightFitList</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Student_Right_Fit_List__c</objectType>
+    </variables>
+</Flow>

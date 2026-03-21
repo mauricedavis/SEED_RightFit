@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <description>Updates Term Name when Academic Term record is created or updated. The update should only fire if the School field is changed and not changed to blank AND Period does not equal &quot;No period&quot; (comes from NSC no match) AND Enrolled in College = Yes.
+
+Created by CoPilot CSM (Craig) 1/29/26</description>
+    <environments>Default</environments>
+    <interviewLabel>Updated Academic Term Naming Convention {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Updated Academic Term Naming Convention</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Update_Academic_Term_Name</name>
+        <label>Update Academic Term Name</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>Name</field>
+            <value>
+                <stringValue>{!$Record.CoFo_SIS__Student__r.CoFo_SIS__Full_Name__c} - {!$Record.CoFo_SIS__Academic_Year__c} - {!$Record.CoFo_SIS__Period__c}</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Update_Academic_Term_Name</targetReference>
+        </connector>
+        <filterLogic>(1 AND 2 AND 3) OR (2 AND 3 AND 4)</filterLogic>
+        <filters>
+            <field>CoFo_SIS__School__c</field>
+            <operator>IsChanged</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <filters>
+            <field>CoFo_SIS__Enrolled_in_College__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Yes</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>CoFo_SIS__Period__c</field>
+            <operator>NotEqualTo</operator>
+            <value>
+                <stringValue>No period</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>CoFo_SIS__School__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>CoFo_SIS__Academic_Semester__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

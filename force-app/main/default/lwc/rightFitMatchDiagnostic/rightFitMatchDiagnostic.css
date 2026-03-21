@@ -1,0 +1,120 @@
+.simulator {
+    --criteria-gap: 0.25rem;
+}
+
+.simulator-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 1rem;
+    min-height: 400px;
+}
+
+@media (max-width: 768px) {
+    .simulator-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.criteria-panel {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.criteria-panel .slds-form-element {
+    margin-bottom: var(--criteria-gap);
+}
+
+.criteria-panel .slds-form-element__label {
+    font-size: 0.75rem;
+}
+
+.criteria-panel .criteria-section {
+    margin-top: 0.5rem;
+}
+
+.criteria-panel .criteria-section:first-of-type {
+    margin-top: 0.25rem;
+}
+
+.criteria-panel .criteria-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.criteria-panel .criteria-checkbox {
+    margin-bottom: 0.125rem;
+}
+
+.region-checkbox-group,
+.size-checkbox-group,
+.setting-checkbox-group {
+    --slds-c-checkbox-group: 0 0.5rem 0 0;
+}
+
+.region-checkbox-group fieldset,
+.size-checkbox-group fieldset,
+.setting-checkbox-group fieldset {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.25rem 1rem;
+}
+
+.ranges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.range-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1 1 auto;
+    min-width: 100px;
+}
+
+.range-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    min-width: 3.5rem;
+    flex-shrink: 0;
+}
+
+.range-inputs {
+    display: flex;
+    gap: 0.125rem;
+    flex: 1;
+}
+
+.range-inputs lightning-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.section-header .criteria-section-title {
+    margin-bottom: 0;
+}
+
+.results-panel {
+    min-width: 0;
+}
+
+.results-table-wrapper {
+    overflow-x: auto;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.results-table-wrapper table {
+    font-size: 0.8125rem;
+}

@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Salesforce
+.sfdx/
+.sf/
+.localdevserver/
+*.log
+*.tgz
+
+# IDE
+.idea/
+*.iml
+.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+*.lcov
+
+# Build artifacts
+dist/
+*.zip
