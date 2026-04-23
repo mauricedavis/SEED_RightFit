@@ -1,0 +1,75 @@
+ROLLBACK RECORD — SEED Right Fit: optional low GPA, community user flows, password invocable
+===============================================================================
+Date: 2026-04-23
+Git commit deployed: 7d05c2cd6d9436e87c3f7b982f0646be84aa8d89 (main)
+Parent / last known-good (before this bundle): e24f1c9  (use for git restore)
+
+ORGS AND DEPLOY JOBS (Setup → Deployment Status)
+------------------------------------------------
+A) seed-fullsb  (username pattern: mjdavis1@attainpartners.com.fullsb)
+   1) User password Apex (3 classes) — Succeeded
+      Deploy ID: 0AfU700000FxKmsKAF
+   2) App bundle (8 components) — Succeeded
+      Deploy ID: 0AfU700000FxUB7KAN
+
+B) seedfoundation  (SEED Foundation prod)
+   Combined 11 metadata types — Succeeded
+   Deploy ID: 0AfUa00000230aDKAQ
+
+WHAT SHIPPED (paths in repo)
+----------------------------
+force-app/main/default/classes/RightFitMatchService.cls
+force-app/main/default/classes/RightFitMatchServiceTest.cls
+force-app/main/default/classes/UserPasswordFlowAction.cls
+force-app/main/default/classes/UserPasswordFlowAction.cls-meta.xml
+force-app/main/default/classes/UserPasswordFlowActionTest.cls
+force-app/main/default/classes/UserPasswordFlowActionTest.cls-meta.xml
+force-app/main/default/classes/UserPasswordResetQueueable.cls
+force-app/main/default/classes/UserPasswordResetQueueable.cls-meta.xml
+force-app/main/default/flows/Automation_Contact_Create_Parent_User.flow-meta.xml
+force-app/main/default/flows/Automation_Contact_Create_Student_User.flow-meta.xml
+force-app/main/default/flows/New_Community_User_Update_User_on_Contact.flow-meta.xml
+force-app/main/default/flows/Student_Right_Fit_School_Selection_Criteria.flow-meta.xml
+force-app/main/default/lwc/rightFitMatchDiagnostic/rightFitMatchDiagnostic.js
+force-app/main/default/lwc/rightFitMatchPreview/rightFitMatchPreview.html
+force-app/main/default/lwc/rightFitMatchPreview/rightFitMatchPreview.js
+
+ROLLBACK OPTION A — From git (recommended)
+------------------------------------------
+1) cd "c:\Users\MauriceJDavis\SEED_RightFit"
+
+2) Restore pre-release versions of the files that *existed* in e24f1c9:
+   git checkout e24f1c9 -- force-app/main/default/classes/RightFitMatchService.cls
+   git checkout e24f1c9 -- force-app/main/default/classes/RightFitMatchServiceTest.cls
+   git checkout e24f1c9 -- force-app/main/default/flows/Automation_Contact_Create_Parent_User.flow-meta.xml
+   git checkout e24f1c9 -- force-app/main/default/flows/Automation_Contact_Create_Student_User.flow-meta.xml
+   git checkout e24f1c9 -- force-app/main/default/flows/New_Community_User_Update_User_on_Contact.flow-meta.xml
+   git checkout e24f1c9 -- force-app/main/default/flows/Student_Right_Fit_School_Selection_Criteria.flow-meta.xml
+   git checkout e24f1c9 -- force-app/main/default/lwc/rightFitMatchDiagnostic/rightFitMatchDiagnostic.js
+   git checkout e24f1c9 -- force-app/main/default/lwc/rightFitMatchPreview/rightFitMatchPreview.html
+   git checkout e24f1c9 -- force-app/main/default/lwc/rightFitMatchPreview/rightFitMatchPreview.js
+
+3) **Remove** the six UserPassword* / UserPasswordReset* files (they were not in e24f1c9):
+   - Delete them in the project (or: git show e24f1c9 does not have them; rm the files and meta, then plan org deletion below).
+
+4) Redeploy **modified** components to the org that needs rollback (order: Apex that flows depend on first, then flows, then LWCs). Example for seedfoundation (get human approval before any deploy):
+
+   sf project deploy start -m "ApexClass:RightFitMatchService" -m "ApexClass:RightFitMatchServiceTest" -m "Flow:Automation_Contact_Create_Parent_User" -m "Flow:Automation_Contact_Create_Student_User" -m "Flow:New_Community_User_Update_User_on_Contact" -m "Flow:Student_Right_Fit_School_Selection_Criteria" -m "LightningComponentBundle:rightFitMatchDiagnostic" -m "LightningComponentBundle:rightFitMatchPreview" -o seedfoundation --wait 30
+
+5) If the **New_Community_User_Update_User_on_Contact** flow must no longer call UserPasswordFlowAction, and you reverted that flow in step 2, you are consistent. If you also need the three Apex classes **gone** from the org (so nothing references them):
+
+   sf project delete source --target-org seedfoundation --metadata ApexClass:UserPasswordFlowAction
+   (repeat for UserPasswordFlowActionTest, UserPasswordResetQueueable *only if* you are sure — confirm with admin; destructive.)
+
+ROLLBACK OPTION B — Full tree at parent commit (nuclear, use a clean branch)
+-----------------------------------------------------------------------------
+- git worktree add ..\SEED_Rollback e24f1c9
+- deploy from that worktree with the same -m list as the original release (or paths). Verify flows that referenced new Apex still work after you delete the new Apex from org.
+
+VERIFY AFTER ROLLBACK
+---------------------
+- **Student match survey (community):** Low GPA field optional; submit with/without as expected.
+- **rightFitMatchPreview / RightFitMatchService:** preview counts and match path behave as before.
+- **User create / contact automation:** if you removed UserPassword*, confirm no flow still references the invocable (open flow in Setup → Flows).
+
+See also: docs\DEPLOYMENT-ROLLBACK.md (general runbook)
