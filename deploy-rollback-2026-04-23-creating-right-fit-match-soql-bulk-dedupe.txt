@@ -58,3 +58,20 @@ ROLLBACK (restore prior flow + remove new Apex) — get human approval first
 NOTES
 -----
 - Deploy Apex and the flow together; the flow action references RightFitMatchListGapAction.
+
+FOLLOW-UP 2026-04-23 (flow-only) — “Get Matching Schools” may return zero rows
+---------------------------------------------------------------------------
+PROBLEM: Saving from “Right Fit Student Match Criteria Capture (Screen Flow)” could fail
+with CANNOT_EXECUTE_FLOW_TRIGGER: the “Creating Right Fit Match Records” autolaunch
+failed because Get Records “Get Matching Schools” used assignNullValuesIfNoRecordsFound
+= false, so a zero-row match set faulted the Get and bubbled to the create.
+
+FIX: In Creating_Right_Fit_Match_Records, set Get_Matching_Schools to
+assignNullValuesIfNoRecordsFound = true; empty collection continues to invocable/loop
+without fault.
+
+FLOW-ONLY deploy (no Apex):
+- seed-fullsb:    Deploy ID 0AfU700000FxLKmKAN
+- seedfoundation: Deploy ID 0AfUa00000230dSKAQ
+
+  sf project deploy start -o <alias> -m "Flow:Creating_Right_Fit_Match_Records" --wait 20

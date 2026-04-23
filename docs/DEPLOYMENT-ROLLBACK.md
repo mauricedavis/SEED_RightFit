@@ -43,6 +43,6 @@ Salesforce does not offer a one-click “undo” for API metadata deploys. Rollb
 |-----------|------|
 | 2026-04-06 | [../deploy-rollback-seedfoundation-login-link-contrast-2026-04-06.txt](../deploy-rollback-seedfoundation-login-link-contrast-2026-04-06.txt) |
 | 2026-04-23 | [../deploy-rollback-2026-04-23-seed-rightfit.txt](../deploy-rollback-2026-04-23-seed-rightfit.txt) (GPA, community, password bundle) |
-| 2026-04-23 | [../deploy-rollback-2026-04-23-creating-right-fit-match-soql-bulk-dedupe.txt](../deploy-rollback-2026-04-23-creating-right-fit-match-soql-bulk-dedupe.txt) — *Creating Right Fit Match* flow: bulk SRL de-dupe / 101 SOQL fix (`RightFitMatchListGapAction` + `Creating_Right_Fit_Match_Records`); seed-fullsb + seedfoundation |
+| 2026-04-23 | [../deploy-rollback-2026-04-23-creating-right-fit-match-soql-bulk-dedupe.txt](../deploy-rollback-2026-04-23-creating-right-fit-match-soql-bulk-dedupe.txt) — *Creating Right Fit Match* flow: bulk SRL de-dupe / 101 SOQL; **follow-up** flow deploy (Get zero matching schools, no `CANNOT_EXECUTE_FLOW_TRIGGER` on survey save); same file lists both deploys |
 
 Add a new `deploy-rollback-YYYY-MM-DD-*.txt` for each major production deploy you may need to reverse.

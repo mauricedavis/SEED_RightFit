@@ -122,7 +122,8 @@
     <description>This flow creates the right fit matches. Adds Test Scores Optional
 
 12.16.2025 (MJD) - Updated flow to trigger on Create AND Update (instead of just Create only).
-04.23.2026 — Replace per-iteration SRL Get Records with invocable RightFitMatchListGapAction (avoids 101 SOQL when many schools match).</description>
+04.23.2026 — Replace per-iteration SRL Get Records with invocable RightFitMatchListGapAction (avoids 101 SOQL when many schools match).
+04.23.2026 — Get Matching Schools: allow zero rows (assign null when not found) so a criteria save does not fail when no colleges match; avoids CANNOT_EXECUTE_FLOW_TRIGGER in the survey screen flow.</description>
     <environments>Default</environments>
     <formulas>
         <description>ACT Composite score high from student match record</description>
@@ -402,7 +403,7 @@ If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;800&apos;), 800,
         <label>Get Matching Schools</label>
         <locationX>176</locationX>
         <locationY>431</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Filter_College_Gap</targetReference>
         </connector>
