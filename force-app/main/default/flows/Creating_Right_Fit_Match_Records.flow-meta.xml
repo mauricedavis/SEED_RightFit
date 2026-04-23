@@ -82,6 +82,22 @@
             <targetReference>Add_to_collVar_of_Right_Fit_Match_Lists</targetReference>
         </connector>
     </assignments>
+    <assignments>
+        <name>Set_Filtered_College_Accounts</name>
+        <label>Set Filtered College Accounts</label>
+        <locationX>176</locationX>
+        <locationY>512</locationY>
+        <assignmentItems>
+            <assignToReference>varFilteredColleges</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Filter_College_Gap.collegesToCreate</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_through_Colleges</targetReference>
+        </connector>
+    </assignments>
     <constants>
         <name>SEEDMatchGreenConstant</name>
         <dataType>String</dataType>
@@ -103,28 +119,10 @@
             <stringValue>Yellow</stringValue>
         </value>
     </constants>
-    <decisions>
-        <name>Does_Right_Fit_School_already_Exist</name>
-        <label>Does Right Fit School already Exist</label>
-        <locationX>396</locationX>
-        <locationY>755</locationY>
-        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
-        <rules>
-            <name>Right_Fit_Doesn_t_Exist</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>RightFitSchools.Id</leftValueReference>
-                <operator>EqualTo</operator>
-            </conditions>
-            <connector>
-                <targetReference>Assign_rec_variables_for_Right_Fit_Match_List</targetReference>
-            </connector>
-            <label>Right Fit Doesn&apos;t Exist</label>
-        </rules>
-    </decisions>
     <description>This flow creates the right fit matches. Adds Test Scores Optional
 
-12.16.2025 (MJD) - Updated flow to trigger on Create AND Update (instead of just Create only).</description>
+12.16.2025 (MJD) - Updated flow to trigger on Create AND Update (instead of just Create only).
+04.23.2026 — Replace per-iteration SRL Get Records with invocable RightFitMatchListGapAction (avoids 101 SOQL when many schools match).</description>
     <environments>Default</environments>
     <formulas>
         <description>ACT Composite score high from student match record</description>
@@ -310,15 +308,42 @@ If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;800&apos;), 800,
     </formulas>
     <interviewLabel>Creating Right Fit Match Records {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Automation - Student Match Criteria - Creating Right Fit Match Records</label>
+    <actionCalls>
+        <name>Filter_College_Gap</name>
+        <label>Filter to colleges not yet on Student Right Fit</label>
+        <locationX>176</locationX>
+        <locationY>500</locationY>
+        <actionName>RightFitMatchListGapAction</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <connector>
+            <targetReference>Set_Filtered_College_Accounts</targetReference>
+        </connector>
+        <inputParameters>
+            <name>contactId</name>
+            <value>
+                <elementReference>Get_Contact_Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>matchedColleges</name>
+            <value>
+                <elementReference>Get_Matching_Schools</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>RightFitMatchListGapAction</nameSegment>
+        <offset>0</offset>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </actionCalls>
     <loops>
         <name>Loop_through_Colleges</name>
         <label>Loop through Colleges</label>
         <locationX>176</locationX>
         <locationY>539</locationY>
-        <collectionReference>Get_Matching_Schools</collectionReference>
+        <collectionReference>varFilteredColleges</collectionReference>
         <iterationOrder>Asc</iterationOrder>
         <nextValueConnector>
-            <targetReference>RightFitSchools</targetReference>
+            <targetReference>Assign_rec_variables_for_Right_Fit_Match_List</targetReference>
         </nextValueConnector>
         <noMoreValuesConnector>
             <targetReference>Create_collVar_Records</targetReference>
@@ -379,7 +404,7 @@ If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;800&apos;), 800,
         <locationY>431</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>Loop_through_Colleges</targetReference>
+            <targetReference>Filter_College_Gap</targetReference>
         </connector>
         <filterLogic>(1 OR 2) AND 3 AND 4 AND ((5 AND 6 AND 7 AND 8) OR (9 AND 10) OR 23) AND (11 OR 12 OR 13 OR 14 OR 15 OR 16 OR 17 OR 18) AND (19 OR 20 OR 21) AND 22</filterLogic>
         <filters>
@@ -549,34 +574,6 @@ If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;800&apos;), 800,
         <sortOrder>Asc</sortOrder>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
-    <recordLookups>
-        <name>RightFitSchools</name>
-        <label>RightFitSchools</label>
-        <locationX>396</locationX>
-        <locationY>647</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>Does_Right_Fit_School_already_Exist</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>College_Match__c</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>Loop_through_Colleges.Id</elementReference>
-            </value>
-        </filters>
-        <filters>
-            <field>Student__c</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>Get_Contact_Record.Id</elementReference>
-            </value>
-        </filters>
-        <getFirstRecordOnly>true</getFirstRecordOnly>
-        <object>Student_Right_Fit_List__c</object>
-        <storeOutputAutomatically>true</storeOutputAutomatically>
-    </recordLookups>
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>
@@ -588,6 +585,14 @@ If(  ISPICKVAL( {!$Record.SAT_Verbal_Low__c}, &apos;800&apos;), 800,
         <triggerType>RecordAfterSave</triggerType>
     </start>
     <status>Active</status>
+    <variables>
+        <name>varFilteredColleges</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>Account</objectType>
+    </variables>
     <variables>
         <name>colVar_StudentRightFitList</name>
         <dataType>SObject</dataType>

@@ -1,0 +1,62 @@
+ROLLBACK / DEPLOY RECORD — “Creating Right Fit Match” flow: bulk SRL de-dupe (101 SOQL fix)
+============================================================================================
+Date: 2026-04-23
+Git: search `git log` on `main` for the commit whose subject is
+"fix(right-fit): bulk SRL de-dupe for Creating Right Fit Match flow (101 SOQL)" (includes
+this file and the Apex/flow changes).
+
+PROBLEM
+-------
+Flow "Automation - Student Match Criteria - Creating Right Fit Match Records" could hit
+"Too many SOQL queries: 101" when many schools matched, because a Get Records on
+Student Right Fit List ran once per school inside a loop (element RightFitSchools).
+
+SOLUTION
+--------
+Invocable RightFitMatchListGapAction: one bulk query for existing list rows, one for
+Account fields, output collegesToCreate. Flow: Get Matching Schools -> Apex -> assign
+varFilteredColleges -> loop (no in-loop SRL get).
+
+ORGS AND DEPLOY JOBS (Setup → Deployment Status)
+------------------------------------------------
+A) seed-fullsb (mjdavis1@attainpartners.com.fullsb)
+   Single deploy: ApexClass RightFitMatchListGapAction, RightFitMatchListGapActionTest;
+   Flow Creating_Right_Fit_Match_Records. Tests: RunSpecifiedTests = RightFitMatchListGapActionTest
+   — Succeeded
+   Deploy ID: 0AfU700000FxVaDKAV
+
+B) seedfoundation (SEED Foundation prod, mjdavis1@attainpartners.com)
+   Same components and test level.
+   — Succeeded
+   Deploy ID: 0AfUa00000230tZKAQ
+
+COMPONENTS (paths in repo)
+--------------------------
+force-app/main/default/classes/RightFitMatchListGapAction.cls
+force-app/main/default/classes/RightFitMatchListGapAction.cls-meta.xml
+force-app/main/default/classes/RightFitMatchListGapActionTest.cls
+force-app/main/default/classes/RightFitMatchListGapActionTest.cls-meta.xml
+force-app/main/default/flows/Creating_Right_Fit_Match_Records.flow-meta.xml
+
+RE-DEPLOY (e.g. after hotfix; run tests as org policy requires)
+----------------------------------------------------------------
+  sf project deploy start -o <alias> -m "ApexClass:RightFitMatchListGapAction" -m "ApexClass:RightFitMatchListGapActionTest" -m "Flow:Creating_Right_Fit_Match_Records" --test-level RunSpecifiedTests --tests RightFitMatchListGapActionTest --wait 30
+
+ROLLBACK (restore prior flow + remove new Apex) — get human approval first
+---------------------------------------------------------------------------
+1) From git, restore the previous Creating_Right_Fit_Match_Records flow and remove the
+   two new Apex classes from the org if you are reverting the feature:
+
+   git checkout <parent-SHA> -- force-app/main/default/flows/Creating_Right_Fit_Match_Records.flow-meta.xml
+   (Deploy the flow, then:)
+   sf project delete source -o <alias> --metadata ApexClass:RightFitMatchListGapAction
+   (Also delete the test class from the org, or keep it if you only revert the flow; the
+   flow will fail if it still references the invocable and Apex is removed — deploy
+   the restored flow first, then remove Apex. Order: deploy old flow, then delete Apex classes.)
+
+2) If only the org must be reverted: retrieve known-good flow from a sandbox, deploy it,
+   then remove the new classes as above.
+
+NOTES
+-----
+- Deploy Apex and the flow together; the flow action references RightFitMatchListGapAction.
