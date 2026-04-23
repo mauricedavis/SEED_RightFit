@@ -60,6 +60,7 @@ NOTES
 - Deploy Apex and the flow together; the flow action references RightFitMatchListGapAction.
 
 FOLLOW-UP 2026-04-23 (flow-only) — “Get Matching Schools” may return zero rows
+Git: 4044d02  (message: fix(flow): allow zero Get Matching Schools rows to avoid screen-flow trigger fault)
 ---------------------------------------------------------------------------
 PROBLEM: Saving from “Right Fit Student Match Criteria Capture (Screen Flow)” could fail
 with CANNOT_EXECUTE_FLOW_TRIGGER: the “Creating Right Fit Match Records” autolaunch
