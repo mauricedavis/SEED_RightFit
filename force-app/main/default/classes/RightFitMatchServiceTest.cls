@@ -247,4 +247,34 @@ private class RightFitMatchServiceTest {
         System.assertNotEquals(null, result, 'Result should not be null');
         System.assertNotEquals(null, result.suggestions, 'Suggestions should not be null');
     }
+
+    /**
+     * Optional low GPA (survey): blank low + high set — preview should load and run without requiring gpaLow.
+     */
+    @IsTest
+    static void testLoadCriteriaFromRecordBlankLowGpa() {
+        Student_Match_Criteria__c smc = new Student_Match_Criteria__c();
+        smc.Test_Score_Optional_Schools__c = true;
+        smc.Southeast__c = true;
+        smc.Small_Less_than_5_000_Students__c = true;
+        smc.Urban__c = true;
+        for (Schema.PicklistEntry pe : Student_Match_Criteria__c.High_GPA_Accet__c.getDescribe().getPicklistValues()) {
+            if (pe.isActive()) {
+                smc.High_GPA_Accet__c = pe.getValue();
+                break;
+            }
+        }
+        insert smc;
+
+        RightFitMatchService.CriteriaInput loaded = RightFitMatchService.loadCriteriaFromRecord(smc.Id);
+        System.assertEquals(null, loaded.gpaLow, 'Blank low GPA picklist should parse as null');
+        System.assertNotEquals(null, loaded.gpaHigh, 'High GPA should be set from picklist');
+
+        Test.startTest();
+        RightFitMatchService.MatchPreviewResult preview = RightFitMatchService.getMatchPreviewByRecordId(smc.Id);
+        Test.stopTest();
+
+        System.assertNotEquals(null, preview, 'Preview should not be null');
+        System.assertNotEquals(null, preview.matchCount, 'Match count should not be null');
+    }
 }

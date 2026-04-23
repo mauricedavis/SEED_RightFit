@@ -2,7 +2,7 @@ import { LightningElement, api } from 'lwc';
 import getMatchPreviewByRecordId from '@salesforce/apex/RightFitMatchService.getMatchPreviewByRecordId';
 import getMatchPreviewBySelections from '@salesforce/apex/RightFitMatchService.getMatchPreviewBySelections';
 
-const SUGGESTION_THRESHOLD = 10;
+const MIN_MATCHES_TO_PROCEED = 1;
 
 export default class RightFitMatchPreview extends LightningElement {
     _lastRefreshKey = 0;
@@ -154,14 +154,14 @@ export default class RightFitMatchPreview extends LightningElement {
     }
 
     get statusClass() {
-        if (this.matchCount >= SUGGESTION_THRESHOLD) return 'slds-theme_success';
-        if (this.matchCount > 0) return 'slds-theme_warning';
+        if (this.matchCount >= MIN_MATCHES_TO_PROCEED) return 'slds-theme_success';
         return 'slds-theme_error';
     }
 
     get statusLabel() {
-        if (this.matchCount >= SUGGESTION_THRESHOLD) return `${this.matchCount} colleges matched — you can proceed!`;
-        if (this.matchCount > 0) return `${this.matchCount} colleges matched — consider broadening criteria for more options.`;
+        if (this.matchCount >= MIN_MATCHES_TO_PROCEED) {
+            return `${this.matchCount} college${this.matchCount === 1 ? '' : 's'} matched — you can proceed!`;
+        }
         return 'No colleges matched your criteria.';
     }
 

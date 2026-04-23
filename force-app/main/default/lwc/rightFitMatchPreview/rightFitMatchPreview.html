@@ -14,10 +14,10 @@
                 <h3 class="slds-text-heading_small slds-m-bottom_x-small">{statusLabel}</h3>
                 <p class="slds-text-body_small">
                     <template lwc:if={canSubmit}>
-                        You have at least 10 matches. You may proceed to submit.
+                        You have at least one match. You may proceed to submit.
                     </template>
                     <template lwc:else>
-                        You need at least 10 matches to proceed. Use the suggestions below to broaden your search.
+                        You need at least one match to proceed. Use the suggestions below to broaden your search.
                     </template>
                 </p>
                 <template lwc:if={showRecalculateButton}>

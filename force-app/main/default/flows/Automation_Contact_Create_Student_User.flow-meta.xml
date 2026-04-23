@@ -68,7 +68,7 @@
         <inputParameters>
             <name>recipientId</name>
             <value>
-                <elementReference>Get_Contact_Record_Just_Created.Owner.ContactId</elementReference>
+                <elementReference>Get_Contact_Record_Just_Created.OwnerId</elementReference>
             </value>
         </inputParameters>
         <inputParameters>
@@ -116,7 +116,7 @@
         <inputParameters>
             <name>emailBody</name>
             <value>
-                <stringValue>&lt;p&gt;&lt;span style=&quot;color: rgb(34, 34, 34); font-family: Arial, Helvetica, sans-serif; font-size: small; background-color: rgb(255, 255, 255);&quot;&gt;Dear {!$Record.FirstName},&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: rgb(34, 34, 34); font-family: Arial, Helvetica, sans-serif; font-size: small; background-color: rgb(255, 255, 255);&quot;&gt;Congratulations!  A SEED Counselor,&amp;nbsp;{!Get_Contact_Record_Just_Created.Owner.Contact.FirstName} {!Get_Contact_Record_Just_Created.Owner.Contact.LastName}, has been assigned to you.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;strong style=&quot;color: rgb(34, 34, 34); font-family: Arial, Helvetica, sans-serif; font-size: small; background-color: rgb(255, 255, 255);&quot;&gt;SEED Administrator&lt;/strong&gt;&lt;/p&gt;</stringValue>
+                <stringValue>&lt;p&gt;&lt;span style=&quot;color: rgb(34, 34, 34); font-family: Arial, Helvetica, sans-serif; font-size: small; background-color: rgb(255, 255, 255);&quot;&gt;Dear {!$Record.FirstName},&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;color: rgb(34, 34, 34); font-family: Arial, Helvetica, sans-serif; font-size: small; background-color: rgb(255, 255, 255);&quot;&gt;Congratulations!  A SEED Counselor,&amp;nbsp;{!Get_Contact_Record_Just_Created.Owner.Name}, has been assigned to you.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;strong style=&quot;color: rgb(34, 34, 34); font-family: Arial, Helvetica, sans-serif; font-size: small; background-color: rgb(255, 255, 255);&quot;&gt;SEED Administrator&lt;/strong&gt;&lt;/p&gt;</stringValue>
             </value>
         </inputParameters>
         <inputParameters>
@@ -134,7 +134,7 @@
         <inputParameters>
             <name>relatedRecordId</name>
             <value>
-                <elementReference>$Record.Owner.ContactId</elementReference>
+                <elementReference>$Record.AccountId</elementReference>
             </value>
         </inputParameters>
         <inputParameters>
@@ -257,8 +257,111 @@
             <label>SEED LA</label>
         </rules>
     </decisions>
+    <decisions>
+        <name>Campaign_DC_Found</name>
+        <label>Campaign DC Found?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No - skip campaign add</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Campaign_DC_Found</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Formula_Campaign_DC_Found</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Add_Student_to_SEED_DC_Campaign</targetReference>
+            </connector>
+            <label>Yes - add to campaign</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Campaign_LA_Found</name>
+        <label>Campaign LA Found?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No - skip campaign add</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Campaign_LA_Found</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Formula_Campaign_LA_Found</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Add_Student_to_SEED_LA_Campaign</targetReference>
+            </connector>
+            <label>Yes - add to campaign</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Campaign_MD_Found</name>
+        <label>Campaign MD Found?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No - skip campaign add</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Campaign_MD_Found</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Formula_Campaign_MD_Found</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Add_Student_to_SEED_MD_Campaign</targetReference>
+            </connector>
+            <label>Yes - add to campaign</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Campaign_Miami_Found</name>
+        <label>Campaign Miami Found?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No - skip campaign add</defaultConnectorLabel>
+        <rules>
+            <name>Yes_Campaign_Miami_Found</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Formula_Campaign_Miami_Found</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Add_Student_to_SEED_Miami_Campaign</targetReference>
+            </connector>
+            <label>Yes - add to campaign</label>
+        </rules>
+    </decisions>
     <description>When the student&apos;s Contact record is created, we automatically create a student Portal User record for the student with appropriate permissions.
 
+03.2026 (MJD) - v16 - Updated all campaign lookups to use "Cohort" naming: SEED DC Cohort, SEED LA Cohort, SEED MD Cohort, SEED Miami Cohort.
+03.2026 (MJD) - v15 - Added fault paths to Campaign Member create elements so flow continues when add fails (e.g., INVALID_CROSS_REFERENCE_KEY from Campaign Member Record Type). Student creation and assignment still complete; campaign add is skipped on failure.
+03.2026 (MJD) - v14 - Replaced hardcoded Campaign IDs with lookups by Name (SEED DC, SEED LA, SEED MD, SEED Miami) so flow works across orgs/sandboxes. Skip campaign add when campaign not found.
 09.09.2025 (MJD) - v13 - Added insertion of Contact into appropriate &apos;SEED&apos; Cohort Campaign.
 09.09.2025 (MJD) - v12 - Added email send/logging to Student when the Counselor is assigned.
 09.09.2025 (MJD) - v11 - Added check for &apos;The SEED Foundation&apos; INTERNAL User - i.e. if new Contact is associated with &apos;The SEED Foundation&apos;, the flow does NOT create a new user (assumption is that a user has already been created for INTERNAL Users).
@@ -292,6 +395,26 @@
         <dataType>String</dataType>
         <expression>{!$Record.Email} + &quot;.student&quot;</expression>
     </formulas>
+    <formulas>
+        <name>Formula_Campaign_DC_Found</name>
+        <dataType>Boolean</dataType>
+        <expression>NOT(ISBLANK({!Get_SEED_DC_Campaign.Id}))</expression>
+    </formulas>
+    <formulas>
+        <name>Formula_Campaign_LA_Found</name>
+        <dataType>Boolean</dataType>
+        <expression>NOT(ISBLANK({!Get_SEED_LA_Campaign.Id}))</expression>
+    </formulas>
+    <formulas>
+        <name>Formula_Campaign_MD_Found</name>
+        <dataType>Boolean</dataType>
+        <expression>NOT(ISBLANK({!Get_SEED_MD_Campaign.Id}))</expression>
+    </formulas>
+    <formulas>
+        <name>Formula_Campaign_Miami_Found</name>
+        <dataType>Boolean</dataType>
+        <expression>NOT(ISBLANK({!Get_SEED_Miami_Campaign.Id}))</expression>
+    </formulas>
     <interviewLabel>Automation - Contact - Create Student User {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Automation - Contact - Create Student User</label>
     <processMetadataValues>
@@ -321,10 +444,13 @@
         <connector>
             <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
         </connector>
+        <faultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </faultConnector>
         <inputAssignments>
             <field>CampaignId</field>
             <value>
-                <stringValue>701U700000ROexyIAD</stringValue>
+                <elementReference>Get_SEED_DC_Campaign.Id</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -356,10 +482,13 @@
         <connector>
             <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
         </connector>
+        <faultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </faultConnector>
         <inputAssignments>
             <field>CampaignId</field>
             <value>
-                <stringValue>701U700000RP34nIAD</stringValue>
+                <elementReference>Get_SEED_LA_Campaign.Id</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -391,10 +520,13 @@
         <connector>
             <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
         </connector>
+        <faultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </faultConnector>
         <inputAssignments>
             <field>CampaignId</field>
             <value>
-                <stringValue>701U700000ROnuhIAD</stringValue>
+                <elementReference>Get_SEED_MD_Campaign.Id</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -426,10 +558,13 @@
         <connector>
             <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
         </connector>
+        <faultConnector>
+            <targetReference>Post_Assignment_of_Student_to_Counselor</targetReference>
+        </faultConnector>
         <inputAssignments>
             <field>CampaignId</field>
             <value>
-                <stringValue>701U700000RP31ZIAT</stringValue>
+                <elementReference>Get_SEED_Miami_Campaign.Id</elementReference>
             </value>
         </inputAssignments>
         <inputAssignments>
@@ -563,13 +698,97 @@
         <object>Contact</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <recordLookups>
+        <name>Get_SEED_DC_Campaign</name>
+        <label>Get SEED DC Campaign</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Campaign_DC_Found</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Name</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>SEED DC Cohort</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Campaign</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_SEED_LA_Campaign</name>
+        <label>Get SEED LA Campaign</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Campaign_LA_Found</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Name</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>SEED LA Cohort</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Campaign</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_SEED_MD_Campaign</name>
+        <label>Get SEED MD Campaign</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Campaign_MD_Found</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Name</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>SEED MD Cohort</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Campaign</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_SEED_Miami_Campaign</name>
+        <label>Get SEED Miami Campaign</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>true</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Campaign_Miami_Found</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Name</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>SEED Miami Cohort</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Campaign</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
     <recordUpdates>
         <name>Assign_SEED_DC_Students</name>
         <label>Assign SEED DC Students</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Add_Student_to_SEED_DC_Campaign</targetReference>
+            <targetReference>Get_SEED_DC_Campaign</targetReference>
         </connector>
         <inputAssignments>
             <field>OwnerId</field>
@@ -585,7 +804,7 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Add_Student_to_SEED_LA_Campaign</targetReference>
+            <targetReference>Get_SEED_LA_Campaign</targetReference>
         </connector>
         <inputAssignments>
             <field>OwnerId</field>
@@ -601,7 +820,7 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Add_Student_to_SEED_MD_Campaign</targetReference>
+            <targetReference>Get_SEED_MD_Campaign</targetReference>
         </connector>
         <inputAssignments>
             <field>OwnerId</field>
@@ -617,7 +836,7 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <connector>
-            <targetReference>Add_Student_to_SEED_Miami_Campaign</targetReference>
+            <targetReference>Get_SEED_Miami_Campaign</targetReference>
         </connector>
         <inputAssignments>
             <field>OwnerId</field>

@@ -1,10 +1,11 @@
 /**
  * RightFitMatchService - Core matching logic for SEED Right Fit
- * Mirrors flow "Automation - Student Match Criteria - Creating Right Fit Match Records"
+ * Aligns with flow "Creating Right Fit Match Records" (Green/Yellow colleges only; no Red).
  * Used by rightFitMatchPreview (student) and rightFitMatchDiagnostic (admin) LWCs
  */
 public with sharing class RightFitMatchService {
-    private static final Integer SUGGESTION_THRESHOLD = 10;
+    /** Minimum Green/Yellow matches required before student can submit (portal preview). */
+    private static final Integer SUGGESTION_THRESHOLD = 1;
     private static final Integer ALL_REGIONS_COUNT = 8;
     private static final Integer ALL_SIZES_COUNT = 3;
     private static final Integer ALL_SETTINGS_COUNT = 4;
@@ -20,7 +21,7 @@ public with sharing class RightFitMatchService {
     }
 
     /**
-     * Match preview for student flow - returns count and suggestions when 0-9 matches
+     * Match preview for student flow - returns count and suggestions when below minimum matches
      */
     @AuraEnabled(cacheable=false)
     public static MatchPreviewResult getMatchPreview(CriteriaInput criteria) {
@@ -231,18 +232,49 @@ public with sharing class RightFitMatchService {
 
     // --- Private helpers ---
 
+    /**
+     * Ensures low <= high for each range so matching matches the simulator even when
+     * flow picklists are saved with values reversed (e.g. High GPA 2.5 / Low GPA 4.5).
+     */
+    private static void normalizeCriteriaRanges(CriteriaInput c) {
+        if (c == null) {
+            return;
+        }
+        if (c.gpaLow != null && c.gpaHigh != null && c.gpaLow > c.gpaHigh) {
+            Double t = c.gpaLow;
+            c.gpaLow = c.gpaHigh;
+            c.gpaHigh = t;
+        }
+        if (c.actLow != null && c.actHigh != null && c.actLow > c.actHigh) {
+            Double t = c.actLow;
+            c.actLow = c.actHigh;
+            c.actHigh = t;
+        }
+        if (c.satMathLow != null && c.satMathHigh != null && c.satMathLow > c.satMathHigh) {
+            Double t = c.satMathLow;
+            c.satMathLow = c.satMathHigh;
+            c.satMathHigh = t;
+        }
+        if (c.satVerbalLow != null && c.satVerbalHigh != null && c.satVerbalLow > c.satVerbalHigh) {
+            Double t = c.satVerbalLow;
+            c.satVerbalLow = c.satVerbalHigh;
+            c.satVerbalHigh = t;
+        }
+    }
+
     private static List<Account> getMatchingAccounts(CriteriaInput c) {
         if (c == null) {
             return new List<Account>();
         }
+        normalizeCriteriaRanges(c);
 
         List<String> dynamicClauses = new List<String>();
 
         // Base: RecordType College
         dynamicClauses.add('RecordType.DeveloperName = \'College\'');
 
-        // Color - Right Fit rated schools only (mimics: SEED_College_Matching_Color__c in ('Red', 'Yellow', 'Green'))
-        dynamicClauses.add('SEED_College_Matching_Color__c IN (\'Red\', \'Yellow\', \'Green\')');
+        // Green and Yellow only — exclude Red-rated colleges from matching
+        dynamicClauses.add('SEED_College_Matching_Color__c IN (\'Yellow\', \'Green\')');
 
         // GPA (3 AND 4) - exclude schools with no GPA when user specifies a range
         if (c.gpaLow != null && c.gpaHigh != null) {
@@ -261,16 +293,9 @@ public with sharing class RightFitMatchService {
         if (c.testScoresOptional == true) {
             testClauses.add('Test_Scores_Optional__c = true');
         }
-        if (testClauses.isEmpty()) {
-            if (c.diagnosticMode == true) {
-                // Diagnostic/simulator: no test filter when user hasn't selected any - show all colleges
-                // Skip adding test clause; do not add to dynamicClauses
-            } else {
-                // Student flow: require at least one test path - if none provided, match test-optional only
-                testClauses.add('Test_Scores_Optional__c = true');
-                dynamicClauses.add('(' + String.join(testClauses, ' OR ') + ')');
-            }
-        } else {
+        // Same as diagnostic/simulator: if no SAT/ACT/test-optional selection, do not filter on test scores.
+        // (Previously student-only path required Test_Scores_Optional__c = true, which hid most colleges.)
+        if (!testClauses.isEmpty()) {
             dynamicClauses.add('(' + String.join(testClauses, ' OR ') + ')');
         }
 
@@ -367,12 +392,12 @@ public with sharing class RightFitMatchService {
             suggestions.add('No colleges matched your criteria. Try these adjustments:');
         }
 
-        // SAT / ACT / Test Optional — required; often the main blocker
+        // SAT / ACT / Test Optional — optional; matching uses other criteria when omitted (same as simulator)
         Boolean hasTestPath = (criteria.satMathLow != null && criteria.satMathHigh != null && criteria.satVerbalLow != null && criteria.satVerbalHigh != null)
             || (criteria.actLow != null && criteria.actHigh != null)
             || criteria.testScoresOptional == true;
-        if (!hasTestPath) {
-            suggestions.add('Provide at least one: SAT Math & Verbal ranges, ACT Composite range, or Test Optional. Colleges are matched based on your selection.');
+        if (!hasTestPath && matchCount == 0) {
+            suggestions.add('Optional: add ACT, SAT ranges, or Test Optional if you want to filter by test policy.');
         } else if (criteria.testScoresOptional == true && criteria.actLow == null && criteria.satMathLow == null) {
             suggestions.add('Test-optional only matches colleges that have opted in. If you have SAT or ACT scores, try entering your score ranges to see more matches.');
         } else if (criteria.testScoresOptional != true && (criteria.actLow == null && criteria.satMathLow == null)) {
@@ -432,19 +457,16 @@ public with sharing class RightFitMatchService {
         fb.possibleCauses = new List<String>();
         Boolean hasLocation = (c.regions != null && !c.regions.isEmpty()) || (c.sizes != null && !c.sizes.isEmpty())
             || (c.collegeSettings != null && !c.collegeSettings.isEmpty()) || String.isNotBlank(c.collegeSetting);
-        Boolean hasTestPath = (c.satMathLow != null && c.satMathHigh != null && c.satVerbalLow != null && c.satVerbalHigh != null)
-            || (c.actLow != null && c.actHigh != null) || c.testScoresOptional == true;
 
         if (!hasLocation) {
             fb.possibleCauses.add('No regions, sizes, or college settings were loaded. Your selections may not have been saved correctly.');
         }
-        if (!hasTestPath) {
-            fb.possibleCauses.add('No test score criteria (ACT, SAT, or Test Optional). At least one is required for matching.');
-        }
-        if (hasLocation && hasTestPath) {
-            fb.possibleCauses.add('No Colleges in the database match all criteria. Colleges must be Right Fit rated (Yellow, Green, or Red).');
-            fb.possibleCauses.add('College data (Region, Size, Setting, GPA, ACT) may not match your selections.');
-            fb.possibleCauses.add('If you selected Test Optional only, few colleges may have opted in.');
+        if (hasLocation) {
+            fb.possibleCauses.add('No colleges in the database match all criteria. Colleges must be Right Fit rated Green or Yellow (Red schools are excluded).');
+            fb.possibleCauses.add('College data (Region, Size, Setting, GPA, ACT/SAT) may not match your selections.');
+            if (c.testScoresOptional == true) {
+                fb.possibleCauses.add('If you selected Test Optional only, fewer colleges may match.');
+            }
         }
 
         fb.nextSteps = new List<String>();
@@ -483,7 +505,7 @@ public with sharing class RightFitMatchService {
         @AuraEnabled public List<String> sizes;
         @AuraEnabled public List<String> collegeSettings;
         @AuraEnabled public String collegeSetting;
-        /** When true (diagnostic/simulator), skip test filter when no test criteria provided. */
+        /** Reserved for future use; student and diagnostic matching use the same test-score rules. */
         @AuraEnabled public Boolean diagnosticMode;
 
         public CriteriaInput copy() {

@@ -828,7 +828,7 @@ v.61 populates the Match Criteria lookup on the contact record.
                     <fieldText>Low GPA for Accepted Students</fieldText>
                     <fieldType>DropdownBox</fieldType>
                     <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
-                    <isRequired>true</isRequired>
+                    <isRequired>false</isRequired>
                 </fields>
                 <inputParameters>
                     <name>width</name>

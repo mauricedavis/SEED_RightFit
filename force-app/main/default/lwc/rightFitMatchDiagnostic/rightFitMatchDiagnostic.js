@@ -10,6 +10,7 @@ const SIZES = [
 ];
 const SETTINGS = ['Rural', 'Town', 'Suburban', 'Urban'];
 const DEBOUNCE_MS = 300;
+const MIN_MATCHES_SUCCESS_BADGE = 1;
 
 export default class RightFitMatchDiagnostic extends LightningElement {
     gpaLow = '';
@@ -220,7 +221,7 @@ export default class RightFitMatchDiagnostic extends LightningElement {
     }
 
     get activeFiltersSummary() {
-        const parts = ['Rated: Yellow/Green/Red'];
+        const parts = ['Rated: Green & Yellow only (Red excluded)'];
         if (this.selectedRegions && this.selectedRegions.length > 0) parts.push('Region: ' + this.selectedRegions.join(', '));
         if (this.selectedSizes && this.selectedSizes.length > 0) parts.push('Size: ' + this.selectedSizes.join(', '));
         if (this.settingAnyAll) {
@@ -258,8 +259,7 @@ export default class RightFitMatchDiagnostic extends LightningElement {
     }
 
     get resultBadgeClass() {
-        if (this.matchCount >= 10) return 'slds-theme_success';
-        if (this.matchCount > 0) return 'slds-theme_warning';
+        if (this.matchCount >= MIN_MATCHES_SUCCESS_BADGE) return 'slds-theme_success';
         return 'slds-theme_error';
     }
 
