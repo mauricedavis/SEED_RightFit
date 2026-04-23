@@ -1,9 +1,7 @@
 ROLLBACK / DEPLOY RECORD — “Creating Right Fit Match” flow: bulk SRL de-dupe (101 SOQL fix)
 ============================================================================================
 Date: 2026-04-23
-Git: search `git log` on `main` for the commit whose subject is
-"fix(right-fit): bulk SRL de-dupe for Creating Right Fit Match flow (101 SOQL)" (includes
-this file and the Apex/flow changes).
+Git (pushed to origin/main): efb9ab9
 
 PROBLEM
 -------
